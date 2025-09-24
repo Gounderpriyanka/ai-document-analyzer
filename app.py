@@ -1,13 +1,14 @@
 import streamlit as st
 import google.generativeai as genai
 import os
-from dotenv import load_dotenv
 
-# Load environment variables
-load_dotenv()
-
-# Configure Gemini API
-genai.configure(api_key=os.getenv('GEMINI_API_KEY'))
+# Configure Gemini API - using Streamlit secrets
+try:
+    genai.configure(api_key=st.secrets["GEMINI_API_KEY"])
+    st.sidebar.success("✅ Gemini API Connected!")
+except Exception as e:
+    st.error("❌ API Key not configured. Please check your Streamlit secrets.")
+    st.stop()
 
 # Advanced prompt templates with role-playing
 PROMPT_TEMPLATES = {
@@ -39,34 +40,14 @@ PROMPT_TEMPLATES = {
     """
 }
 
-def test_prompt_effectiveness():
-    """Function to demonstrate prompt engineering concepts"""
-    st.sidebar.header("🔧 Prompt Engineering Lab")
-    
-    st.sidebar.write("**Test Different Prompt Styles:**")
-    
-    basic_prompt = "Summarize this text: {text}"
-    advanced_prompt = PROMPT_TEMPLATES["summarize"]
-    
-    st.sidebar.text_area("Basic Prompt", basic_prompt, height=80)
-    st.sidebar.text_area("Advanced Prompt", advanced_prompt, height=200)
-    
-    st.sidebar.write("**Notice the difference:**")
-    st.sidebar.write("- Role definition (expert content summarizer)")
-    st.sidebar.write("- Specific output structure")
-    st.sidebar.write("- Clear formatting instructions")
-
 def main():
     st.set_page_config(page_title="AI Document Analyzer", page_icon="🤖")
     
     st.title("📄 AI Document Analyzer with Prompt Engineering")
     st.write("Upload a document or paste text to analyze it using advanced AI prompts")
     
-    # Display prompt engineering info
-    test_prompt_effectiveness()
-    
     # File upload section
-    uploaded_file = st.file_uploader("Choose a text file", type=['txt', 'pdf'])
+    uploaded_file = st.file_uploader("Choose a text file", type=['txt'])
     user_text = st.text_area("Or paste your text here", height=150)
     
     # Use uploaded file or text area content
@@ -131,7 +112,7 @@ def main():
                         
                 except Exception as e:
                     st.error(f"Error: {str(e)}")
-                    st.info("💡 Tip: Check your API key and internet connection")
+                    st.info("💡 Tip: The app might be restarting. Try again in a moment.")
 
     else:
         st.info("👆 Please upload a file or enter text to get started!")
